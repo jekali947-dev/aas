@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { Mail, Lock, Bike } from "lucide-react"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase"
-import { WaterDroplets } from "@/components/water-droplets"
 
 interface LoginPageProps {
   onLoginSuccess: () => void
@@ -16,6 +15,11 @@ export function LoginPage({ onLoginSuccess, onSignUp }: LoginPageProps) {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    videoRef.current?.play().catch(() => {})
+  }, [])
 
   const handleSignIn = useCallback(async () => {
     if (!email || !password) {
@@ -53,19 +57,18 @@ export function LoginPage({ onLoginSuccess, onSignUp }: LoginPageProps) {
   const isFormValid = email.length > 0 && password.length > 0
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden">
-      {/* Background Image - dark rainy scene with delivery rider */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: "url('/images/shop.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center bottom",
-        }}
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <video
+        ref={videoRef}
+        src="/videos/bike_droplets.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        onError={(event) => console.warn("Background video failed to load", event.currentTarget.src)}
+        className="absolute inset-0 z-0 size-full object-cover object-center"
       />
-
-      {/* Water Droplets Animation Layer */}
-      <WaterDroplets />
 
       {/* Content Container */}
       <div className="relative z-10 min-h-dvh flex items-center justify-center p-4">

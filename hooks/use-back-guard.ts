@@ -8,6 +8,8 @@ const parents: Record<string, string> = { addProduct: "products", products: "set
 export function useBackGuard(activePage: string, setActivePage: (page: string) => void, popupExpanded: boolean, minimizePopup: () => void, enabled = true, hasPopup = false) {
   const lastBackRef = useRef(0)
   const handlingRef = useRef(false)
+  const pageChangedByBackRef = useRef(false)
+  const enabledRef = useRef(false)
   const activePageRef = useRef(activePage)
   const popupExpandedRef = useRef(popupExpanded)
   const hasPopupRef = useRef(hasPopup)
@@ -33,10 +35,11 @@ export function useBackGuard(activePage: string, setActivePage: (page: string) =
     }
     if (currentPage === "dashboard") {
       const now = Date.now()
-      if (now - lastBackRef.current < 2000) { history.back(); return }
+      if (now - lastBackRef.current < 2000) { handlingRef.current = false; history.back(); return }
       lastBackRef.current = now; history.pushState({ app: "merchant", page: currentPage }, "", location.href); toast("Press back again to exit"); handlingRef.current = false; return
     }
     const next = parents[currentPage] || "dashboard"
+    pageChangedByBackRef.current = true
     setActivePageRef.current(next)
     history.pushState({ app: "merchant", page: next }, "", location.href)
     handlingRef.current = false
@@ -51,6 +54,21 @@ export function useBackGuard(activePage: string, setActivePage: (page: string) =
     return () => removeEventListener("popstate", onPopState)
   }, [enabled])
 
-  useEffect(() => { if (enabled && !handlingRef.current) history.pushState({ app: "merchant", page: activePage }, "", location.href) }, [activePage, enabled])
+  useEffect(() => {
+    if (!enabled) {
+      enabledRef.current = false
+      return
+    }
+    if (!enabledRef.current) {
+      enabledRef.current = true
+      pageChangedByBackRef.current = false
+      return
+    }
+    if (pageChangedByBackRef.current) {
+      pageChangedByBackRef.current = false
+      return
+    }
+    if (!handlingRef.current) history.pushState({ app: "merchant", page: activePage }, "", location.href)
+  }, [activePage, enabled])
   return { handleHardwareBack }
 }

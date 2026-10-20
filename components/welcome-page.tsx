@@ -1,23 +1,31 @@
 "use client"
 
+import { useEffect, useRef } from "react"
+
 interface WelcomePageProps {
   onSignIn: () => void
   onSignUp: () => void
 }
 
 export function WelcomePage({ onSignIn, onSignUp }: WelcomePageProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    videoRef.current?.play().catch(() => {})
+  }, [])
+
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden">
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
       {/* Background Video - warm rainy street scene */}
       <video
+        ref={videoRef}
         src="/videos/bike_droplets.mp4"
         autoPlay
         loop
         muted
         playsInline
         preload="auto"
-        poster="/images/bike.png"
-        onError={(event) => event.currentTarget.pause()}
+        onError={(event) => console.warn("Background video failed to load", event.currentTarget.src)}
         className="absolute inset-0 z-0 size-full object-cover object-center"
       />
 
