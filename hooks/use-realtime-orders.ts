@@ -76,7 +76,7 @@ export function useRealtimeOrders(storeId: string | null): UseRealtimeOrdersRetu
       }
       previousOrdersRef.current = new Map(orders.map((order) => [order.id, order]))
       const activeOrders = orders.filter((order) => order.status !== "cancelled")
-      setCancelledOrders(orders.filter((order) => order.status === "cancelled")); setPendingOrders(activeOrders.filter((order) => ["pending", "new"].includes(order.status))); setAcceptedOrders(activeOrders.filter((order) => ["accepted", "preparing", "ready_for_pickup"].includes(order.status))); setCompletedOrders(activeOrders.filter((order) => isOrderCompleted(order.status))); setAllOrders(activeOrders); setIsLoading(false); initializedRef.current = true
+      setCancelledOrders(orders.filter((order) => order.status === "cancelled")); setPendingOrders(activeOrders.filter((order) => ["pending", "new"].includes(order.status))); setAcceptedOrders(activeOrders.filter((order) => ["accepted", "preparing", "ready_for_pickup"].includes(order.status) && !order.driverStatus)); setCompletedOrders(activeOrders.filter((order) => isOrderCompleted(order.status))); setAllOrders(activeOrders); setIsLoading(false); initializedRef.current = true
     }, (err) => { console.error("Error listening to orders:", err); setError(err.message); setIsLoading(false) })
   }, [storeId])
 

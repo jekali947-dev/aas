@@ -13,7 +13,7 @@ export interface AddressSuggestion {
 }
 
 const GEOAPIFY_BASE_URL = "https://api.geoapify.com/v1/geocode/autocomplete"
-const GEOAPIFY_API_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY
+const GEOAPIFY_API_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY || process.env.NEXT_PUBLIC_GEOAPIFY_KEY
 export const isAddressSearchConfigured = Boolean(GEOAPIFY_API_KEY)
 
 export async function reverseGeocode(lat: number, lng: number): Promise<AddressSuggestion | null> {
@@ -31,7 +31,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<AddressS
 // EXPORTED FUNCTION - UI CALLS THIS
 // ============================================
 export async function searchAddress(query: string): Promise<AddressSuggestion[]> {
-  if (!query || query.length < 2) {
+  if (!query || query.length < 3) {
     return []
   }
 

@@ -5,14 +5,17 @@ import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "@/lib/firebase"
 import { useCall } from "@/contexts/call-context"
-import { callServiceStart, callServiceStop, disposeNativeCalls, initNativeCalls, isNative } from "@/native/calls"
+import { callServiceStart, callServiceStop, cancelCallNotification, disposeNativeCalls, initNativeCalls, isNative } from "@/native/calls"
 
 export function NativeCallsBoot({ onOpenOrders }: { onOpenOrders: () => void }) {
-  const { callState, answerCall } = useCall()
+  const { callState, callId, answerCall } = useCall()
   const tokenRef = useRef<string | null>(null)
   const callStateRef = useRef(callState)
+  const callIdRef = useRef<string | null>(callId)
+  const previousCallStateRef = useRef(callState)
   const answeredRef = useRef(false)
   callStateRef.current = callState
+  callIdRef.current = callId
 
   useEffect(() => {
     if (callState === "in-call") callServiceStart()
@@ -20,7 +23,7 @@ export function NativeCallsBoot({ onOpenOrders }: { onOpenOrders: () => void }) 
   }, [callState])
 
   useEffect(() => {
-    if (!isNative) return
+    if (!isNative()) return
     let activeUid: string | null = null
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -41,7 +44,7 @@ export function NativeCallsBoot({ onOpenOrders }: { onOpenOrders: () => void }) 
           answeredRef.current = true
           const deadline = Date.now() + 10000
           const wait = () => {
-            if (callStateRef.current === "ringing") { void answerCall(); return }
+            if (callStateRef.current === "ringing") { cancelCallNotification(callIdRef.current); void answerCall(); return }
             if (Date.now() < deadline) window.setTimeout(wait, 250)
           }
           wait()
@@ -52,6 +55,10 @@ export function NativeCallsBoot({ onOpenOrders }: { onOpenOrders: () => void }) 
     return () => { unsubscribe(); void disposeNativeCalls() }
   }, [answerCall, onOpenOrders])
 
-  useEffect(() => { if (callState !== "ringing") answeredRef.current = false }, [callState])
+  useEffect(() => {
+    if (previousCallStateRef.current === "ringing" && callState !== "ringing") cancelCallNotification(callIdRef.current)
+    previousCallStateRef.current = callState
+    if (callState !== "ringing") answeredRef.current = false
+  }, [callState])
   return null
 }
