@@ -20,6 +20,7 @@ export function StoreInfoPage({ storeInfo, storeId, onBack, onSave }: StoreInfoP
   const [name, setName] = useState(storeInfo.name || "")
   const [address, setAddress] = useState(storeInfo.address || "")
   const [addressCoords, setAddressCoords] = useState(storeInfo.storeLocation || null)
+  const [addressPlaceId, setAddressPlaceId] = useState<string | null>(null)
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([])
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false)
   const [isAddressFocused, setIsAddressFocused] = useState(false)
@@ -60,7 +61,7 @@ export function StoreInfoPage({ storeInfo, storeId, onBack, onSave }: StoreInfoP
       const results = await searchAddress(query)
       setAddressSuggestions(results)
       setIsSearchingAddress(false)
-      setAddressMessage(results.length === 0 ? "No matches, you can still type your address" : null)
+      setAddressMessage(results.length === 0 ? "No results" : null)
     }, 300)
     return () => window.clearTimeout(timer)
   }, [address, isAddressFocused])
@@ -68,6 +69,7 @@ export function StoreInfoPage({ storeInfo, storeId, onBack, onSave }: StoreInfoP
   const handleAddressSearch = (value: string) => {
     setAddress(value)
     setAddressCoords(null)
+    setAddressPlaceId(null)
   }
 
   const handleUseCurrentLocation = () => {
@@ -91,6 +93,7 @@ export function StoreInfoPage({ storeInfo, storeId, onBack, onSave }: StoreInfoP
   const handleSelectAddress = (suggestion: AddressSuggestion) => {
     setAddress(suggestion.fullAddress)
     setAddressCoords(suggestion.coordinates || null)
+    setAddressPlaceId(suggestion.placeId || suggestion.id)
     setShowAddressSuggestions(false)
   }
 
@@ -133,7 +136,8 @@ export function StoreInfoPage({ storeInfo, storeId, onBack, onSave }: StoreInfoP
         logo: logoUrl,
         storeName: name.trim(),
         address: address.trim(),
-        location: addressCoords,
+        location: addressCoords ? { latitude: addressCoords.lat, longitude: addressCoords.lng } : null,
+        addressPlaceId: addressPlaceId || null,
         phone: phone.trim(),
       }, { merge: true })
 

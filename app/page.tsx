@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast"
 import { CallProvider } from "@/contexts/call-context"
 import { CallOverlay } from "@/components/call-overlay"
 import { StoreCallButton } from "@/components/store-call-button"
+import { NativeCallsBoot } from "@/components/native-calls-boot"
 import { useBackGuard } from "@/hooks/use-back-guard"
 import type { StoreData, Product, OpeningHour, StoreInfo } from "@/lib/store-data"
 
@@ -486,6 +487,7 @@ export default function MerchantApp() {
       <div className="flex flex-col h-dvh w-full max-w-[1200px] mx-auto bg-background">
         <Toaster />
         <CallOverlay />
+        <NativeCallsBoot onOpenOrders={() => setActivePage("orders")} />
       {/* Global Order Popup Panel */}
       {pendingOrderForPopup && (
         <OrderPopupPanel

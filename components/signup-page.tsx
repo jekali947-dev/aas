@@ -50,6 +50,7 @@ export function SignupPage({ onSignupSuccess, onSignIn }: SignupPageProps) {
   const [category, setCategory] = useState("")
   const [address, setAddress] = useState("")
   const [addressCoords, setAddressCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [addressPlaceId, setAddressPlaceId] = useState<string | null>(null)
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([])
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false)
   const [isAddressFocused, setIsAddressFocused] = useState(false)
@@ -159,7 +160,7 @@ export function SignupPage({ onSignupSuccess, onSignIn }: SignupPageProps) {
       const results = await searchAddress(query)
       setAddressSuggestions(results)
       setIsSearchingAddress(false)
-      setAddressSearchMessage(results.length === 0 ? "No matches, you can still type your address" : null)
+      setAddressSearchMessage(results.length === 0 ? "No results" : null)
     }, 300)
     return () => window.clearTimeout(timer)
   }, [address, isAddressFocused])
@@ -185,11 +186,13 @@ export function SignupPage({ onSignupSuccess, onSignIn }: SignupPageProps) {
   const handleAddressSearch = useCallback((query: string) => {
     setAddress(query)
     setAddressCoords(null)
+    setAddressPlaceId(null)
   }, [])
 
   const handleSelectAddress = useCallback((suggestion: AddressSuggestion) => {
     setAddress(suggestion.fullAddress)
     setAddressCoords(suggestion.coordinates || null)
+    setAddressPlaceId(suggestion.placeId || suggestion.id)
     setShowAddressSuggestions(false)
   }, [])
 
@@ -218,9 +221,10 @@ export function SignupPage({ onSignupSuccess, onSignIn }: SignupPageProps) {
         email,
         address,
         location: addressCoords ? {
-          lat: addressCoords.lat,
-          lng: addressCoords.lng,
+          latitude: addressCoords.lat,
+          longitude: addressCoords.lng,
         } : null,
+        addressPlaceId: addressPlaceId || null,
         rating: 0,
         reviewCount: 0,
         createdAt: serverTimestamp(),

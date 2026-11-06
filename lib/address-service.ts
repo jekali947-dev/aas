@@ -41,7 +41,7 @@ export async function searchAddress(query: string): Promise<AddressSuggestion[]>
   }
 
   try {
-    const url = `${GEOAPIFY_BASE_URL}?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_API_KEY}&limit=7&format=json`
+    const url = `${GEOAPIFY_BASE_URL}?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_API_KEY}&limit=5&filter=countrycode:zm&format=json`
     const response = await fetch(url)
 
     if (!response.ok) {
@@ -62,6 +62,7 @@ export async function searchAddress(query: string): Promise<AddressSuggestion[]>
       }
       return {
         id: result.place_id || index.toString(),
+        placeId: result.place_id,
         name: result.address_line1 || result.formatted || "",
         fullAddress: result.formatted || "",
         coordinates: {
